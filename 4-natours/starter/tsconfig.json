@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+  "module": "commonjs"
+  },
+  "include": ["*.ts", "src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
