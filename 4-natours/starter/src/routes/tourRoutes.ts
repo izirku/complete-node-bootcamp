@@ -1,7 +1,6 @@
 import express = require('express')
 // import logger from '../logger';
 import {
-  checkBody,
   getAllTours,
   createTour,
   getTour,
@@ -21,7 +20,7 @@ const router = express.Router()
 router
   .route('/')
   .get(getAllTours)
-  .post(checkBody, createTour)
+  .post(createTour)
 
 router
   .route('/:id')

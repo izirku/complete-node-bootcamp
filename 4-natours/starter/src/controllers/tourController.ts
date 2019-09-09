@@ -3,6 +3,7 @@
 import express = require('express')
 // import ToursSimple from '../interfaces/ToursSimple'
 import Tour from '../models/tourModel'
+import logger from '../logger'
 
 // const toursPath = path.resolve(
 //   __dirname,
@@ -11,70 +12,69 @@ import Tour from '../models/tourModel'
 
 // const tours: ToursSimple[] = JSON.parse(fs.readFileSync(toursPath, 'utf-8'))
 
-// export const checkID = (
-//   _req: express.Request,
-//   res: express.Response,
-//   next: express.NextFunction,
-//   _val: string
-// ): express.Response => {
-//   // if (parseInt(req.params.id) > tours.length) {
-//   // if (parseInt(val) > tours.length) {
-//   return res.status(404).json({
-//     status: 'fail',
-//     message: 'invalid id'
-//   })
-//   // }
-//   next()
-// }
-
-export const checkBody = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-): express.Response => {
-  if (!req.body['name'] || !req.body['price']) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'request body is missng name or price'
-    })
-  }
-  next()
-}
-
-export const getAllTours = (
+export const getAllTours = async (
   _req: express.Request,
   res: express.Response
-): void => {
-  res.status(200).json({
-    status: 'success'
-    // results: tours.length,
-    // data: {
-    //   tours
-    // }
-  })
+): Promise<void> => {
+  try {
+    const tours = await Tour.find()
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        tours
+      }
+    })
+  } catch (err) {
+    logger.error(err)
+    res.status(404).json({
+      status: 'fail',
+      message: 'not found'
+    })
+  }
 }
 
-export const getTour = (req: express.Request, res: express.Response): void => {
-  // const id = parseInt(req.params.id)
-  // const tour = tours.find(el => el.id === id)
-
-  res.status(200).json({
-    // status: 'success',
-    // data: {
-    //   tour
-    // }
-  })
-}
-
-export const createTour = (
+export const getTour = async (
   req: express.Request,
   res: express.Response
-): void => {
-  res.status(201).json({
-    // status: 'success',
-    // data: {
-    //   tour: newTour
-  })
+): Promise<void> => {
+  try {
+    const tour = await Tour.findById(req.params.id)
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour
+      }
+    })
+  } catch (err) {
+    logger.error(err)
+    res.status(404).json({
+      status: 'fail',
+      message: 'not found'
+    })
+  }
+}
+
+export const createTour = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+    const newTour = await Tour.create(req.body)
+    logger.info('created new tour')
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour
+      }
+    })
+  } catch (err) {
+    logger.error(err)
+    res.status(400).json({
+      status: 'fail',
+      message: 'bad request'
+    })
+  }
 }
 
 export const updateTour = (
