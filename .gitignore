@@ -1,3 +1,6 @@
 **/node_modules/
 **/dist/
 **/.cache/
+error.log
+combined.log
+.env

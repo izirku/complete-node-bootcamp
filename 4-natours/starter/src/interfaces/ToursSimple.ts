@@ -1,4 +1,4 @@
-export interface ToursSimple {
+export default interface ToursSimple {
   id: number;
   name: string;
   duration: number;
