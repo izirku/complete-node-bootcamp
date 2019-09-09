@@ -13,10 +13,16 @@ import logger from '../logger'
 // const tours: ToursSimple[] = JSON.parse(fs.readFileSync(toursPath, 'utf-8'))
 
 export const getAllTours = async (
-  _req: express.Request,
+  req: express.Request,
   res: express.Response
 ): Promise<void> => {
   try {
+    const queryObj = { ...req.query } // es6 way of making a deep copy
+    const excludedFields = ['page', 'sort', 'limit', 'fields']
+    excludedFields.forEach(el => delete queryObj[el])
+    logger.info('[req.query]', req.query)
+    logger.info('[queryObj]', queryObj)
+
     const tours = await Tour.find()
     res.status(200).json({
       status: 'success',
@@ -77,31 +83,46 @@ export const createTour = async (
   }
 }
 
-export const updateTour = (
-  _req: express.Request,
+export const updateTour = async (
+  req: express.Request,
   res: express.Response
-): void => {
-  // const id = parseInt(req.params.id);
-  // const tour = tours.find(el => el.id === id);
-
-  res.status(200).json({
-    status: 'succes',
-    data: {
-      tour: '<updatet tour here...>'
-    }
-  })
+): Promise<void> => {
+  try {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, // return new updated document
+      runValidators: true
+    })
+    res.status(200).json({
+      status: 'succes',
+      data: {
+        tour
+      }
+    })
+  } catch (err) {
+    logger.error(err)
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    })
+  }
 }
 
-export const deleteTour = (
-  _req: express.Request,
+export const deleteTour = async (
+  req: express.Request,
   res: express.Response
-): void => {
-  // const id = parseInt(req.params.id);
-  // const tour = tours.find(el => el.id === id);
-
-  // usual response for when deleting resource
-  res.status(204).json({
-    status: 'succes',
-    data: null
-  })
+): Promise<void> => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id)
+    // usual response for when deleting resource
+    res.status(204).json({
+      status: 'succes',
+      data: null
+    })
+  } catch (err) {
+    logger.error(err)
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    })
+  }
 }

@@ -6,6 +6,8 @@
   "scripts": {
     "start": "nodemon",
     "start:prod": "NODE_ENV=production nodemon",
+    "data:delete": "ts-node src/data-import --delete",
+    "data:import": "ts-node src/data-import --import",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
