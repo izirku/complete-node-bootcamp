@@ -1,10 +1,13 @@
 module.exports = {
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   extends: [
-    'airbnb',
-    'prettier',
+    // 'eslint/recommended',
+    'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
+    'prettier/@typescript-eslint', // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
+    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
     'plugin:node/recommended',
-    'plugin:@typescript-eslint/recommended' // Uses the recommended rules from the @typescript-eslint/eslint-plugin
+    // 'airbnb',
+    // 'prettier',
   ],
   parserOptions: {
     ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
@@ -12,18 +15,20 @@ module.exports = {
   },
   plugins: ['prettier'],
   rules: {
-    'prettier/prettier': 'error',
-    'spaced-comment': 'off',
+    'node/no-unsupported-features/es-syntax': 'off',
+    'node/no-missing-import': 'off',
     'no-console': 'warn',
-    'consistent-return': 'off',
-    'func-names': 'off',
-    'object-shorthand': 'off',
-    'no-process-exit': 'off',
-    'no-param-reassign': 'off',
-    'no-return-await': 'off',
-    'no-underscore-dangle': 'off',
-    'class-methods-use-this': 'off',
-    'prefer-destructuring': ['error', { object: true, array: false }],
-    'no-unused-vars': ['error', { argsIgnorePattern: 'req|res|next|val' }]
+    // 'prettier/prettier': 'error',
+    // 'spaced-comment': 'off',
+    // 'consistent-return': 'off',
+    // 'func-names': 'off',
+    // 'object-shorthand': 'off',
+    // 'no-process-exit': 'off',
+    // 'no-param-reassign': 'off',
+    // 'no-return-await': 'off',
+    // 'no-underscore-dangle': 'off',
+    // 'class-methods-use-this': 'off',
+    // 'prefer-destructuring': ['error', { object: true, array: false }],
+    // 'no-unused-vars': ['error', { argsIgnorePattern: 'req|res|next|val' }]
   }
 };

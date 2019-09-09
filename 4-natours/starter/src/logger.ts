@@ -1,4 +1,4 @@
-import winston = require('winston');
+import winston = require('winston')
 
 const logger = winston.createLogger({
   level: 'info',
@@ -26,7 +26,7 @@ const logger = winston.createLogger({
     // new winston.transports.File({ filename: 'combined.log' })
     new winston.transports.Console()
   ]
-});
+})
 
 //
 // If we're not in production then log to the `console` with the format:
@@ -40,4 +40,4 @@ const logger = winston.createLogger({
 //   );
 // }
 
-export default logger;
+export default logger

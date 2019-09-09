@@ -1,23 +1,23 @@
-import express = require('express');
+import express = require('express')
 import {
   getAllUsers,
   createUser,
   getUser,
   updateUser,
   deleteUser
-} from '../controllers/userController';
+} from '../controllers/userController'
 
-const router = express.Router();
+const router = express.Router()
 
 router
   .route('/')
   .get(getAllUsers)
-  .post(createUser);
+  .post(createUser)
 
 router
   .route('/:id')
   .get(getUser)
   .patch(updateUser)
-  .delete(deleteUser);
+  .delete(deleteUser)
 
-export default router;
+export default router

@@ -1,27 +1,27 @@
-import express = require('express');
-import logger from './logger';
-import userRouter from './routes/userRoutes';
-import tourRouter from './routes/tourRoutes';
+import express = require('express')
+import logger from './logger'
+import userRouter from './routes/userRoutes'
+import tourRouter from './routes/tourRoutes'
 
-export const app = express();
+export const app = express()
 
 // *****************************************************************************
 // MIDDLEWARES
 
-app.use(express.json());
+app.use(express.json())
 // app.use(express.static(`${__dirname}/../public`));
 
 // created middleware attached after a rounte, won't affected prior routes
 app.use((req, _res, next) => {
-  logger.info(`${req.protocol} ${req.method} ${req.url}`);
-  next();
-});
+  logger.info(`${req.protocol} ${req.method} ${req.url}`)
+  next()
+})
 
 // *****************************************************************************
 // ROUTES
 
-app.use('/api/v1/tours', tourRouter);
-app.use('/api/v1/users', userRouter);
+app.use('/api/v1/tours', tourRouter)
+app.use('/api/v1/users', userRouter)
 
 // *****************************************************************************
 // JUNK
