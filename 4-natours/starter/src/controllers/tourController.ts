@@ -66,11 +66,25 @@ export const getTour = async (
   }
 }
 
-export const createTour = async (
-  req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
+// 1. takes a RequestHandler
+// 2. returns an anonymous function that wraps a RequestHandler in (1)
+// 3. This new RequestHandler wrapper when called by Express, calls original
+//    RequestHandler (1) and additionally issues .catch on returned
+//    promisse to forward errors to the global error handling middleware
+const catchAsync = (fn: express.RequestHandler): express.RequestHandler => {
+  return (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ): Promise<void> => {
+    // return fn(req, res, next).catch(err => next(err))
+    // reduction inside catch:
+    return fn(req, res, next).catch(next)
+  }
+}
+
+export const createTour = catchAsync(
+  async (req: express.Request, res: express.Response): Promise<void> => {
     const newTour = await Tour.create(req.body)
     logger.info('created new tour')
     res.status(201).json({
@@ -79,14 +93,16 @@ export const createTour = async (
         tour: newTour
       }
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(400).json({
-      status: 'fail',
-      message: 'bad request'
-    })
+    // try {
+    // } catch (err) {
+    //   logger.error(err)
+    //   res.status(400).json({
+    //     status: 'fail',
+    //     message: 'bad request'
+    //   })
+    // }
   }
-}
+)
 
 export const updateTour = async (
   req: express.Request,

@@ -1,5 +1,7 @@
 import express = require('express')
 import logger from './logger'
+import AppError from './utils/appError'
+import globalErrorHandler from './controllers/errorController'
 import userRouter from './routes/userRoutes'
 import tourRouter from './routes/tourRoutes'
 
@@ -22,6 +24,30 @@ app.use((req, _res, next) => {
 
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
+
+app.all(
+  '*',
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // instead of:
+    // res.status(404).json({
+    //   status: 'fail',
+    //   message: `${req.originalUrl} - route not found`
+    // })
+    // create an error:
+    // const err: AppError = new Error(`${req.originalUrl} - route not found`)
+    // err.status = 'fail'
+    // err.statusCode = 404
+
+    // better yet, create a custom AppError that extends regular Error class:
+
+    // if next was given an arguments, it means that Express should skip
+    // all other middleware and execute global error handling middleware
+    next(new AppError(`${req.originalUrl} - route not found`, 404))
+  }
+)
+
+// function with 4 args is recognized by Express as error handling middleware
+app.use(globalErrorHandler)
 
 // *****************************************************************************
 // JUNK
