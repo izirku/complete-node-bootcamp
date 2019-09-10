@@ -1,6 +1,7 @@
 import express = require('express')
 // import logger from '../logger';
 import {
+  aliasTopTours,
   getAllTours,
   createTour,
   getTour,
@@ -16,6 +17,9 @@ const router = express.Router()
 // });
 
 // router.param('id', checkID)
+
+// aliasing "5 top tours" by pre-filling query parameters via middleware:
+router.route('/top-5-tours').get(aliasTopTours, getAllTours)
 
 router
   .route('/')
