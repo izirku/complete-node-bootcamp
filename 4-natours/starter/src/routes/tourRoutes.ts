@@ -1,6 +1,8 @@
 import express = require('express')
 // import logger from '../logger';
 import {
+  getMonthlyPlan,
+  getTourStats,
   aliasTopTours,
   getAllTours,
   createTour,
@@ -20,6 +22,9 @@ const router = express.Router()
 
 // aliasing "5 top tours" by pre-filling query parameters via middleware:
 router.route('/top-5-tours').get(aliasTopTours, getAllTours)
+
+router.route('/stats').get(getTourStats)
+router.route('/monthly-plan/:year').get(getMonthlyPlan)
 
 router
   .route('/')
