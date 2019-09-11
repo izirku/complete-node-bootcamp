@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "start": "nodemon",
+    "start": "NODE_ENV=development nodemon",
     "start:prod": "NODE_ENV=production nodemon",
     "data:delete": "ts-node src/data-import --delete",
     "data:import": "ts-node src/data-import --import",
@@ -20,12 +20,12 @@
     "@typescript-eslint/eslint-plugin": "^2.2.0",
     "@typescript-eslint/parser": "^2.2.0",
     "eslint": "^6.3.0",
-    "eslint-config-prettier": "^6.2.0",
+    "eslint-config-prettier": "^6.3.0",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-prettier": "^3.1.0",
     "prettier": "^1.18.2",
     "ts-node": "^8.3.0",
-    "typescript": "^3.6.2"
+    "typescript": "^3.6.3"
   },
   "dependencies": {
     "dotenv": "^8.1.0",

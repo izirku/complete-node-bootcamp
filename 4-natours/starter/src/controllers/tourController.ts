@@ -1,12 +1,14 @@
-import express = require('express')
+import { Request, Response, NextFunction } from 'express'
 import Tour from '../models/tourModel'
 import logger from '../logger'
 import APIFeatures from '../utils/apiFeatures'
+import catchAsync from '../utils/catchAsync'
+import appError from '../utils/appError'
 
 export const aliasTopTours = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
+  req: Request,
+  _res: Response,
+  next: NextFunction
 ): void => {
   req.query.limit = '5'
   req.query.sort = '-ratingsAverage,price'
@@ -14,19 +16,14 @@ export const aliasTopTours = (
   next()
 }
 
-export const getAllTours = async (
-  req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
-    // build query
+export const getAllTours = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const features = new APIFeatures(Tour.find(), req.query)
       .filter(['page', 'sort', 'limit', 'fields'])
       .sort()
       .limitFields()
       .paginate()
 
-    // execute query
     const tours = await features.query
 
     res.status(200).json({
@@ -36,55 +33,28 @@ export const getAllTours = async (
         tours
       }
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(404).json({
-      status: 'fail',
-      message: 'not found'
-    })
   }
-}
+)
 
-export const getTour = async (
-  req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
+export const getTour = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const tour = await Tour.findById(req.params.id)
+
+    if (!tour) {
+      return next(new appError('not found', 404))
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
         tour
       }
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(404).json({
-      status: 'fail',
-      message: 'not found'
-    })
   }
-}
-
-// 1. takes a RequestHandler
-// 2. returns an anonymous function that wraps a RequestHandler in (1)
-// 3. This new RequestHandler wrapper when called by Express, calls original
-//    RequestHandler (1) and additionally issues .catch on returned
-//    promisse to forward errors to the global error handling middleware
-const catchAsync = (fn: express.RequestHandler): express.RequestHandler => {
-  return (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ): Promise<void> => {
-    // return fn(req, res, next).catch(err => next(err))
-    // reduction inside catch:
-    return fn(req, res, next).catch(next)
-  }
-}
+)
 
 export const createTour = catchAsync(
-  async (req: express.Request, res: express.Response): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const newTour = await Tour.create(req.body)
     logger.info('created new tour')
     res.status(201).json({
@@ -93,66 +63,47 @@ export const createTour = catchAsync(
         tour: newTour
       }
     })
-    // try {
-    // } catch (err) {
-    //   logger.error(err)
-    //   res.status(400).json({
-    //     status: 'fail',
-    //     message: 'bad request'
-    //   })
-    // }
   }
 )
 
-export const updateTour = async (
-  req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
+export const updateTour = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true, // return new updated document
       runValidators: true
     })
+
+    if (!tour) {
+      return next(new appError('not found', 404))
+    }
+
     res.status(200).json({
       status: 'succes',
       data: {
         tour
       }
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(404).json({
-      status: 'fail',
-      message: err
-    })
   }
-}
+)
 
-export const deleteTour = async (
-  req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
-    await Tour.findByIdAndDelete(req.params.id)
+export const deleteTour = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const tour = await Tour.findByIdAndDelete(req.params.id)
     // usual response for when deleting resource
+
+    if (!tour) {
+      return next(new appError('not found', 404))
+    }
+
     res.status(204).json({
       status: 'succes',
       data: null
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(404).json({
-      status: 'fail',
-      message: err
-    })
   }
-}
+)
 
-export const getTourStats = async (
-  _req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
+export const getTourStats = catchAsync(
+  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     const stats = await Tour.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } } // same as filter
@@ -185,20 +136,11 @@ export const getTourStats = async (
         stats
       }
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(404).json({
-      status: 'fail',
-      message: err
-    })
   }
-}
+)
 
-export const getMonthlyPlan = async (
-  req: express.Request,
-  res: express.Response
-): Promise<void> => {
-  try {
+export const getMonthlyPlan = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const year = parseInt(req.params.year)
     const plan = await Tour.aggregate([
       {
@@ -265,11 +207,5 @@ export const getMonthlyPlan = async (
         plan
       }
     })
-  } catch (err) {
-    logger.error(err)
-    res.status(404).json({
-      status: 'fail',
-      message: err
-    })
   }
-}
+)

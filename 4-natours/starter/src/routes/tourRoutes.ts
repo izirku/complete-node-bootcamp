@@ -1,5 +1,4 @@
-import express = require('express')
-// import logger from '../logger';
+import { Router } from 'express'
 import {
   getMonthlyPlan,
   getTourStats,
@@ -10,8 +9,9 @@ import {
   updateTour,
   deleteTour
 } from '../controllers/tourController'
+// import logger from '../logger';
 
-const router = express.Router()
+const router = Router()
 
 // router.param('id', (req, res, next, val) => {
 //   logger.info(`tour id is: ${val}`);
@@ -20,9 +20,7 @@ const router = express.Router()
 
 // router.param('id', checkID)
 
-// aliasing "5 top tours" by pre-filling query parameters via middleware:
 router.route('/top-5-tours').get(aliasTopTours, getAllTours)
-
 router.route('/stats').get(getTourStats)
 router.route('/monthly-plan/:year').get(getMonthlyPlan)
 
