@@ -5,6 +5,8 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "NODE_ENV=development nodemon",
+    "win:dev": "set NODE_ENV=development&& nodemon",
+    "win:prod": "set NODE_ENV=production&& nodemon",
     "start:prod": "NODE_ENV=production nodemon",
     "data:delete": "ts-node src/data-import --delete",
     "data:import": "ts-node src/data-import --import",
@@ -16,7 +18,7 @@
   "devDependencies": {
     "@types/express": "^4.17.1",
     "@types/mongoose": "^5.5.17",
-    "@types/node": "^12.7.4",
+    "@types/node": "^12.7.5",
     "@typescript-eslint/eslint-plugin": "^2.2.0",
     "@typescript-eslint/parser": "^2.2.0",
     "eslint": "^6.3.0",
@@ -28,6 +30,7 @@
     "typescript": "^3.6.3"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^8.1.0",
     "express": "^4.17.1",
     "mongoose": "^5.7.0",

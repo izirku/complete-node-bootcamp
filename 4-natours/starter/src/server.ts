@@ -6,7 +6,7 @@ import { app } from './app'
 
 process.on('uncaughtException', (err: Error) => {
   logger.error('[unhandled excetpion] shutting down...')
-  logger.error(err.name, err.message)
+  logger.error(err.name, err)
   // eslint-disable-next-line no-process-exit
   process.exit(1)
 })
@@ -32,7 +32,7 @@ const server = app.listen(port, () => {
 
 process.on('unhandledRejection', (err: Error) => {
   logger.error('[unhandled rejection] shutting down...')
-  logger.error(err.name, err.message)
+  logger.error(err.name, err)
   // throw new Error('UNHANDLED REJECTION! shutting down...')
   server.close(() => {
     // throw new Error('UNHANDLED REJECTION! shutting down...')
