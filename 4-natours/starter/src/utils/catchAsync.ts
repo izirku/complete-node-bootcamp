@@ -1,5 +1,7 @@
 import { RequestHandler } from 'express'
 
+// TODO: switch to using AppRequest, create AppRequestHandler
+
 // 1. g takes a RequestHandler, fn
 // 2. returns a new anonymous RequestHandler function that original fn
 // 3. This new RequestHandler, when called by Express, calls original

@@ -2,6 +2,11 @@ export default class extends Error {
   statusCode: number
   status: string
   isOperational: boolean
+  code?: number
+  path?: string
+  value?: string
+  errmsg?: string
+  errors?: [{ message: string }]
   constructor(message, statusCode) {
     super(message)
     this.statusCode = statusCode

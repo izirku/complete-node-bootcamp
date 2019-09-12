@@ -30,5 +30,7 @@ module.exports = {
     // 'class-methods-use-this': 'off',
     // 'prefer-destructuring': ['error', { object: true, array: false }],
     // 'no-unused-vars': ['error', { argsIgnorePattern: 'req|res|next|val' }]
+    // 'no-unused-vars': ['error', { argsIgnorePattern: '^_'}],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_'}]
   }
 };

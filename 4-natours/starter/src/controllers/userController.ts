@@ -1,18 +1,24 @@
-import express = require('express')
+import { Request, Response, NextFunction } from 'express'
+import User from '../models/userModel'
+import catchAsync from '../utils/catchAsync'
 
-export const getAllUsers = (
-  req: express.Request,
-  res: express.Response
-): void => {
-  res.status(500).json({
-    status: 'error',
-    message: 'not implemented'
-  })
-}
+export const getAllUsers = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const users = await User.find()
+    res.status(200).json({
+      status: 'success',
+      data: {
+        users
+      }
+    })
+  }
+)
 
 export const createUser = (
-  req: express.Request,
-  res: express.Response
+  req: Request,
+  res: Response,
+  next: NextFunction
 ): void => {
   res.status(500).json({
     status: 'error',
@@ -20,7 +26,11 @@ export const createUser = (
   })
 }
 
-export const getUser = (req: express.Request, res: express.Response): void => {
+export const getUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   res.status(500).json({
     status: 'error',
     message: 'not implemented'
@@ -28,8 +38,9 @@ export const getUser = (req: express.Request, res: express.Response): void => {
 }
 
 export const updateUser = (
-  req: express.Request,
-  res: express.Response
+  req: Request,
+  res: Response,
+  next: NextFunction
 ): void => {
   res.status(500).json({
     status: 'error',
@@ -38,8 +49,9 @@ export const updateUser = (
 }
 
 export const deleteUser = (
-  req: express.Request,
-  res: express.Response
+  req: Request,
+  res: Response,
+  next: NextFunction
 ): void => {
   res.status(500).json({
     status: 'error',

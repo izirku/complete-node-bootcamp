@@ -9,6 +9,7 @@ import {
   updateTour,
   deleteTour
 } from '../controllers/tourController'
+import { protect, restrictTo } from '../controllers/authController'
 // import logger from '../logger';
 
 const router = Router()
@@ -26,13 +27,13 @@ router.route('/monthly-plan/:year').get(getMonthlyPlan)
 
 router
   .route('/')
-  .get(getAllTours)
+  .get(protect, getAllTours)
   .post(createTour)
 
 router
   .route('/:id')
   .get(getTour)
   .patch(updateTour)
-  .delete(deleteTour)
+  .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour)
 
 export default router

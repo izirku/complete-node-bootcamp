@@ -16,6 +16,7 @@ app.use(express.json())
 // created middleware attached after a rounte, won't affected prior routes
 app.use((req, _res, next) => {
   logger.info(`${req.protocol} ${req.method} ${req.url}`)
+  logger.info('[headers]', req.headers)
   next()
 })
 

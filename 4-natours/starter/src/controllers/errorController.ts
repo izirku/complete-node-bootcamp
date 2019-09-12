@@ -1,26 +1,31 @@
-import { ErrorRequestHandler } from 'express'
+import { ErrorRequestHandler, Response } from 'express'
 import AppError from '../utils/appError'
 import logger from '../logger'
 
-const handleCastErrorDB = (err: any): AppError => {
+const handleCastErrorDB = (err: AppError): AppError => {
   const message = `invalid ${err.path}: ${err.value}`
   return new AppError(message, 400)
 }
 
-const handleDuplicateFieldsDB = (err: any): AppError => {
+const handleDuplicateFieldsDB = (err: AppError): AppError => {
   const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0]
   const message = `duplicate unique field value: ${value}`
   return new AppError(message, 400)
 }
 
-const handleValiidationErrorDB = (err: any): AppError => {
-  const errors = Object.values(err.errors).map((el: any) => el.message)
+const handleValiidationErrorDB = (err: AppError): AppError => {
+  const errors = Object.values(err.errors).map(el => el.message)
   const message = `invalid input data: ${errors.join('. ')}`
   return new AppError(message, 400)
   // return new AppError(err.message, 400)
 }
 
-const sendErrorDev = (err: AppError, res): void => {
+const handleJWTError = (): AppError => new AppError('not authorized', 401)
+
+const handleJWTExpiredError = (): AppError =>
+  new AppError('session expired', 401)
+
+const sendErrorDev = (err: AppError, res: Response): void => {
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
@@ -29,7 +34,7 @@ const sendErrorDev = (err: AppError, res): void => {
   })
 }
 
-const sendErrorProd = (err: AppError, res): void => {
+const sendErrorProd = (err: AppError, res: Response): void => {
   // operational, trusted error
   if (err.isOperational) {
     res.status(err.statusCode).json({
@@ -60,11 +65,32 @@ const errorHandlerMiddleware: ErrorRequestHandler = (
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res)
   } else if (process.env.NODE_ENV === 'production') {
-    let error: any = { ...err }
-    if (error.name === 'CastError') error = handleCastErrorDB(error)
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error)
-    if (error.name === 'ValidationError')
-      error = handleValiidationErrorDB(error)
+    let error: AppError = { ...err }
+
+    switch (true) {
+      case error.name === 'CastError':
+        error = handleCastErrorDB(error)
+        break
+      case error.code === 11000:
+        error = handleDuplicateFieldsDB(error)
+        break
+      case error.name === 'ValidationError':
+        error = handleValiidationErrorDB(error)
+        break
+      case error.name === 'JsonWebTokenError':
+        error = handleJWTError()
+        break
+      case error.name === 'TokenExpiredError':
+        error = handleJWTExpiredError()
+        break
+      // default:
+      //   break
+    }
+    // if (error.name === 'CastError') error = handleCastErrorDB(error)
+    // if (error.code === 11000) error = handleDuplicateFieldsDB(error)
+    // if (error.name === 'ValidationError')
+    //   error = handleValiidationErrorDB(error)
+    // if (error.name === 'JsonWebTokenError') error = handleJWTError(error)
 
     sendErrorProd(error, res)
   }
