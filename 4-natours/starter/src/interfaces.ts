@@ -8,12 +8,21 @@ export interface UserDocument extends Document {
   role: string
   password: string
   passwordConfirm: string
+  passwordResetToken: string
+  passwordResetExpires: number
   correctPassword: (s: string, hash: string) => boolean
   changedPasswordAfter: (JWTTimeStamp: number) => boolean
+  createPasswordResetToken: () => string
 }
 
 export interface AppRequest extends Request {
   user?: UserDocument
+}
+
+export interface AppMailOptions {
+  email: string
+  subject: string
+  message: string
 }
 // export default interface ToursSimple {
 //   id: number

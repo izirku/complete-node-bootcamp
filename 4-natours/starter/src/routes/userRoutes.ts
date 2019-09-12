@@ -6,12 +6,19 @@ import {
   updateUser,
   deleteUser
 } from '../controllers/userController'
-import { signup, login } from '../controllers/authController'
+import {
+  signup,
+  login,
+  forgotPassword,
+  resetPassword
+} from '../controllers/authController'
 
 const router = express.Router()
 
 router.post('/signup', signup)
 router.post('/login', login)
+router.post('/forgotPassword', forgotPassword)
+router.patch('/resetPassword/:token', resetPassword)
 
 router
   .route('/')

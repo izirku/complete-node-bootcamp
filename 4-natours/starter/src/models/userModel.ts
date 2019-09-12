@@ -1,3 +1,4 @@
+import crypto = require('crypto')
 import { Schema, Model, model, HookNextFunction } from 'mongoose'
 import bcrypt = require('bcryptjs')
 import { UserDocument } from '../interfaces'
@@ -54,7 +55,9 @@ const userSchema = new Schema({
       'passwords do not match'
     ]
   },
-  passwordChangedAt: Date
+  passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date
 })
 
 userSchema.pre('save', async function(
@@ -89,6 +92,19 @@ userSchema.methods.changedPasswordAfter = function(
   }
   return false
 }
+
+userSchema.methods.createPasswordResetToken = function(): string {
+  const resetToken = crypto.randomBytes(32).toString('hex')
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex')
+  this.passwordResetExpires = Date.now() + 10 * 60000
+
+  console.log({ resetToken }, this.passwordResetToken)
+  return resetToken
+}
+
 // MODEL MUST BE CREATED AFTER SCHEMA MIDDLEWARE!!!
 const UserModel: UserModel = model<UserDocument>('User', userSchema)
 
