@@ -1,11 +1,17 @@
-// import {promisify } = require('util')
+import crypto = require('crypto')
 import { promisify } from 'util'
-import { Request, Response, NextFunction, RequestHandler } from 'express'
+import {
+  Request,
+  Response,
+  NextFunction,
+  RequestHandler,
+  CookieOptions
+} from 'express'
 import jwt = require('jsonwebtoken')
 import User from '../models/userModel'
 import catchAsync from '../utils/catchAsync'
 import AppError from '../utils/appError'
-import { AppRequest } from '../interfaces'
+import { AppRequest, UserDocument } from '../interfaces'
 import sendEmail from '../utils/email'
 // import logger from '../logger'
 
@@ -13,6 +19,33 @@ const signToken = (id: string): string =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
   })
+
+const createSendToken = (
+  user: UserDocument,
+  statusCode: number,
+  res: Response
+): void => {
+  const token = signToken(user._id)
+
+  const cookieOptions: CookieOptions = {
+    expires: new Date(
+      Date.now() + parseInt(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true
+  }
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
+
+  res.cookie('jwt', token, cookieOptions)
+  user.password = undefined
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user
+    }
+  })
+}
 
 // to quickly generate 128 characters wide JWT secret use:
 // node -e "console.log(require('crypto').randomBytes(64).toString('hex'));"
@@ -31,15 +64,7 @@ export const signup = catchAsync(
       passwordChangedAt: Date.now() - 5000
     })
 
-    const token = signToken(newUser._id)
-
-    res.status(201).json({
-      status: 'success',
-      token,
-      data: {
-        user: newUser
-      }
-    })
+    createSendToken(newUser, 201, res)
   }
 )
 
@@ -60,11 +85,7 @@ export const login = catchAsync(
       return next(new AppError('incorrect email or password', 401))
 
     // 3) if all good, return jwt
-    const token = signToken(user._id)
-    res.status(200).json({
-      status: 'success',
-      token
-    })
+    createSendToken(user, 200, res)
   }
 )
 
@@ -155,7 +176,7 @@ export const forgotPassword: RequestHandler = catchAsync(
 
     const message = `
 Forgot your password? Submit a PATCH request with your new password and passwordConfirm to:
-    
+
   ${resetURL}
 
 If you didn't forget your password, please ignore this email!`
@@ -186,9 +207,61 @@ If you didn't forget your password, please ignore this email!`
   }
 )
 
-export const resetPassword: RequestHandler = (req, res, next) => {
-  // 1) get user based on the token
-  // 2) if token has not expired, and there is user, set the new password
-  // 3) update password & changedPasswordAt property for the user
-  // 4) log the user in, send JWT
-}
+export const resetPassword: RequestHandler = catchAsync(
+  async (req, res, next) => {
+    // 1) get user based on the token
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex')
+
+    // 2) if token has not expired, and there is user, set the new password
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() }
+    })
+    if (!user)
+      return next(new AppError('invalid or expired password reset token', 400))
+
+    // 3) update password & changedPasswordAt property for the user
+    user.password = req.body.password
+    user.passwordConfirm = req.body.password
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save()
+
+    // 4) log the user in, send JWT
+    createSendToken(user, 200, res)
+  }
+)
+
+export const updatePassword: RequestHandler = catchAsync(
+  async (
+    req: AppRequest,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> => {
+    // 1) get user
+    // can't simply get user from what 'protect' middleware got, as password
+    // is not on there...
+    // const user = req.user
+    const user = await User.findById(req.user._id).select('+password')
+
+    // 2) check if current password is correct
+    // taken care by middleware, not really, we still have to check actual
+    // password in request...
+    if (
+      !(await user.correctPassword(req.body.passwordCurrent, user.password))
+    ) {
+      return _next(new AppError('not authorized', 401))
+    }
+
+    // 3) update password
+    user.password = req.body.password
+    user.passwordConfirm = req.body.passwordConfirm
+    await user.save()
+
+    // 4) log user in with new password
+    createSendToken(user, 200, res)
+  }
+)

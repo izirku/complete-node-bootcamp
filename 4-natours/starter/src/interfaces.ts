@@ -8,8 +8,10 @@ export interface UserDocument extends Document {
   role: string
   password: string
   passwordConfirm: string
+  passwordChangedAt: number
   passwordResetToken: string
   passwordResetExpires: number
+  active: boolean
   correctPassword: (s: string, hash: string) => boolean
   changedPasswordAfter: (JWTTimeStamp: number) => boolean
   createPasswordResetToken: () => string

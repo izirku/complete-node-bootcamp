@@ -1,4 +1,11 @@
 import express = require('express')
+import rateLimit = require('express-rate-limit')
+import helmet = require('helmet')
+import mongoSanitize = require('express-mongo-sanitize')
+import xss = require('xss-clean')
+import hpp = require('hpp')
+
+// import rateLimit from 'express-rate-limit'
 import logger from './logger'
 import AppError from './utils/appError'
 import globalErrorHandler from './controllers/errorController'
@@ -10,7 +17,40 @@ export const app = express()
 // *****************************************************************************
 // MIDDLEWARES
 
-app.use(express.json())
+// Set security HTTP headers
+app.use(helmet())
+
+// limit requests from same API
+const limiter = new rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'too many requests from this IP'
+})
+app.use('/api', limiter)
+
+// body parser
+app.use(express.json({ limit: '10kb' }))
+
+// data sanitization against NoSQL query injection
+app.use(mongoSanitize())
+
+// data sanitization against XSS
+app.use(xss())
+
+// prevent parameter polution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsAverage',
+      'ratingsQuantity',
+      'maxGroupSize',
+      'difficulty',
+      'price'
+    ]
+  })
+)
+
 // app.use(express.static(`${__dirname}/../public`));
 
 // created middleware attached after a rounte, won't affected prior routes

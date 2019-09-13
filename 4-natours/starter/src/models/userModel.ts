@@ -57,7 +57,12 @@ const userSchema = new Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 })
 
 userSchema.pre('save', async function(
@@ -71,6 +76,35 @@ userSchema.pre('save', async function(
   this.password = await bcrypt.hash(this.password, 12)
   // logger.info(`[encrypted password] ${this.password}`)
   this.passwordConfirm = undefined // do not persist to database
+  next()
+})
+
+userSchema.pre('save', async function(
+  this: UserDocument,
+  next: HookNextFunction
+) {
+  // only run if password was modified
+  if (!this.isModified('password') || this.isNew) return next()
+
+  this.passwordChangedAt = Date.now() - 5000
+  next()
+})
+
+// TODO: see why we cannot use RegExp in TS here like /^find/:
+userSchema.pre('find', function(next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } })
+  next()
+})
+userSchema.pre('findOne', function(next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } })
+  next()
+})
+userSchema.pre('findOneAndUpdate', function(next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } })
+  next()
 })
 
 // Instance methods:
@@ -86,7 +120,7 @@ userSchema.methods.changedPasswordAfter = function(
 ): boolean {
   if (this.passwordChangedAt) {
     const changedTimeStamp = Math.round(this.passwordChangedAt.getTime() / 1000)
-    console.log(changedTimeStamp, JWTTimeStamp)
+    // console.log(changedTimeStamp, JWTTimeStamp)
     // TODO: double check if we should use '<' or '<='
     return JWTTimeStamp <= changedTimeStamp
   }
@@ -101,7 +135,7 @@ userSchema.methods.createPasswordResetToken = function(): string {
     .digest('hex')
   this.passwordResetExpires = Date.now() + 10 * 60000
 
-  console.log({ resetToken }, this.passwordResetToken)
+  // console.log({ resetToken }, this.passwordResetToken)
   return resetToken
 }
 
