@@ -10,7 +10,7 @@ const DB = process.env.MONGO_DB.replace('<PASSWORD>', process.env.MONGO_PASSWD)
 // READ JSON FILE
 const tours = JSON.parse(
   fs.readFileSync(
-    path.resolve(__dirname, '../dev-data/data/tours-simple.json'),
+    path.resolve(__dirname, '../dev-data/data/tours.json'),
     'utf-8'
   )
 )
@@ -47,7 +47,8 @@ const deleteData = async (): Promise<void> => {
       await mongoose.connect(DB, {
         useNewUrlParser: true,
         useCreateIndex: true,
-        useFindAndModify: false
+        useFindAndModify: false,
+        useUnifiedTopology: true
       })
       logger.info('[db] connection succesful')
 
