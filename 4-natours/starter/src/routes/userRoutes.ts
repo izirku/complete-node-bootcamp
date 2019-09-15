@@ -6,7 +6,8 @@ import {
   updateUser,
   deleteUser,
   updateMe,
-  deleteMe
+  deleteMe,
+  getMe
 } from '../controllers/userController'
 import {
   protect,
@@ -14,7 +15,8 @@ import {
   login,
   forgotPassword,
   resetPassword,
-  updatePassword
+  updatePassword,
+  restrictTo
 } from '../controllers/authController'
 
 const router = express.Router()
@@ -23,10 +25,20 @@ router.post('/signup', signup)
 router.post('/login', login)
 router.post('/forgotPassword', forgotPassword)
 router.patch('/resetPassword/:token', resetPassword)
-router.patch('/updateMyPassword', protect, updatePassword)
 
-router.patch('/updateMe', protect, updateMe)
-router.delete('/deleteMe', protect, deleteMe)
+// *****************************************************************************
+// PROTECTED RESOURCES
+router.use(protect)
+
+router.patch('/updateMyPassword', updatePassword)
+
+router.get('/me', getMe, getUser)
+router.patch('/updateMe', updateMe)
+router.delete('/deleteMe', deleteMe)
+
+// *****************************************************************************
+// ADMIN RESTRICTED RESOURCES
+router.use(restrictTo('admin'))
 
 router
   .route('/')

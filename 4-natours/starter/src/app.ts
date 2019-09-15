@@ -11,6 +11,7 @@ import AppError from './utils/appError'
 import globalErrorHandler from './controllers/errorController'
 import userRouter from './routes/userRoutes'
 import tourRouter from './routes/tourRoutes'
+import reviewRouter from './routes/reviewRoutes'
 
 export const app = express()
 
@@ -65,6 +66,7 @@ app.use((req, _res, next) => {
 
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
+app.use('/api/v1/reviews', reviewRouter)
 
 app.all(
   '*',

@@ -1,4 +1,10 @@
-import { RequestHandler, Request, Response, NextFunction } from 'express'
+import { RequestHandler } from 'express'
+import {
+  deleteOne,
+  updateOne,
+  retrieveOne,
+  retrieveAll
+} from './handlerFactory'
 import User from '../models/userModel'
 import catchAsync from '../utils/catchAsync'
 import appError from '../utils/appError'
@@ -10,6 +16,11 @@ const filterObj = (obj: any, ...rest): any => {
     if (rest.includes(k)) newObj[k] = obj[k]
   })
   return newObj
+}
+
+export const getMe: RequestHandler = (req: AppRequest, _res, next) => {
+  req.params.id = req.user.id
+  next()
 }
 
 export const updateMe: RequestHandler = catchAsync(
@@ -43,15 +54,8 @@ export const updateMe: RequestHandler = catchAsync(
 
 export const deleteMe: RequestHandler = catchAsync(
   async (req: AppRequest, res, _next) => {
-    // const updatedUser =
     await User.findByIdAndUpdate(req.user._id, { active: false })
-    // filteredBody,
-    // {
-    //   new: true,
-    //   runValidators: true
-    // }
 
-    // 4) send response
     res.status(204).json({
       status: 'success',
       data: null
@@ -59,59 +63,14 @@ export const deleteMe: RequestHandler = catchAsync(
   }
 )
 
-export const getAllUsers = catchAsync(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const users = await User.find()
-    res.status(200).json({
-      status: 'success',
-      data: {
-        users
-      }
-    })
-  }
-)
-
-export const createUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+export const createUser: RequestHandler = (_req, res, _next): void => {
   res.status(500).json({
     status: 'error',
-    message: 'not implemented'
+    message: 'please use users/signup route instead'
   })
 }
 
-export const getUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  res.status(500).json({
-    status: 'error',
-    message: 'not implemented'
-  })
-}
-
-export const updateUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  res.status(500).json({
-    status: 'error',
-    message: 'not implemented'
-  })
-}
-
-export const deleteUser = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  res.status(500).json({
-    status: 'error',
-    message: 'not implemented'
-  })
-}
+export const getAllUsers = retrieveAll(User)
+export const getUser = retrieveOne(User)
+export const updateUser = updateOne(User) // not to be used with password update
+export const deleteUser = deleteOne(User)

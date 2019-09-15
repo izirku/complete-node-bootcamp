@@ -14,10 +14,10 @@ export default class APIFeatures {
     this.queryObj = { ...queryObj }
   }
 
-  filter(excludedFields: string[]): APIFeatures {
+  filter(): APIFeatures {
     const queryCopy = { ...this.queryObj }
-    // 1) filter out fields
-    excludedFields.forEach(el => delete queryCopy[el])
+      // 1) filter out fields
+    ;['page', 'sort', 'limit', 'fields'].forEach(el => delete queryCopy[el])
 
     // 2) advanced filtering
     let queryString = JSON.stringify(queryCopy)

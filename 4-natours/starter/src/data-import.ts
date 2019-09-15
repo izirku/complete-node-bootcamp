@@ -4,13 +4,27 @@ import path = require('path')
 import mongoose = require('mongoose')
 import logger from './logger'
 import Tour from './models/tourModel'
+import User from './models/userModel'
+import Review from './models/reviewModel'
 
 const DB = process.env.MONGO_DB.replace('<PASSWORD>', process.env.MONGO_PASSWD)
 
 // READ JSON FILE
-const tours = JSON.parse(
+// const tours = JSON.parse(
+//   fs.readFileSync(
+//     path.resolve(__dirname, '../dev-data/data/tours.json'),
+//     'utf-8'
+//   )
+// )
+// const users = JSON.parse(
+//   fs.readFileSync(
+//     path.resolve(__dirname, '../dev-data/data/users.json'),
+//     'utf-8'
+//   )
+// )
+const reviews = JSON.parse(
   fs.readFileSync(
-    path.resolve(__dirname, '../dev-data/data/tours.json'),
+    path.resolve(__dirname, '../dev-data/data/reviews.json'),
     'utf-8'
   )
 )
@@ -18,7 +32,9 @@ const tours = JSON.parse(
 // IMPORT DATA INTO DB
 const importData = async (): Promise<void> => {
   try {
-    await Tour.create(tours)
+    // await Tour.create(tours)
+    // await User.create(users, { validateBeforeSave: false })
+    await Review.create(reviews)
     logger.info('[import] success')
   } catch (err) {
     logger.error(err)
@@ -28,7 +44,9 @@ const importData = async (): Promise<void> => {
 // DELETE ALL DATA FROM DB
 const deleteData = async (): Promise<void> => {
     try {
-      await Tour.deleteMany({})
+      // await Tour.deleteMany({})
+      // await User.deleteMany({})
+      await Review.deleteMany({})
       logger.info('[delete] succes')
     } catch (err) {
       logger.error(err)

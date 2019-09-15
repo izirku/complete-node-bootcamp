@@ -1,7 +1,7 @@
 import crypto = require('crypto')
-import { Schema, Model, model, HookNextFunction } from 'mongoose'
+import { Schema, model, HookNextFunction } from 'mongoose'
 import bcrypt = require('bcryptjs')
-import { UserDocument } from '../interfaces'
+import { UserDocument, UserModel } from '../interfaces'
 // import {}from 'bcryptjs'
 // import slugify from 'slugify'
 // import validator from 'validator'
@@ -10,8 +10,6 @@ import isEmail from 'validator/lib/isEmail'
 // import logger from '../logger'
 
 // name, email, photo, password, passwordConfirm
-
-export type UserModel = Model<UserDocument>
 
 // interface UserModel extends Model<UserDocument> {}
 

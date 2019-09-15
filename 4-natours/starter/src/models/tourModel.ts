@@ -1,9 +1,10 @@
-import mongoose = require('mongoose')
+import { Schema, model, SchemaTypes } from 'mongoose'
 import slugify from 'slugify'
 // import validator from 'validator'
 import logger from '../logger'
+import { TourDocument, TourModel, TourQuery } from '../interfaces'
 
-const toursSchema = new mongoose.Schema(
+const toursSchema = new Schema(
   {
     name: {
       type: String,
@@ -35,7 +36,8 @@ const toursSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
       min: [1, 'rating must be in range of 1-5'],
-      max: [5, 'rating must be in range of 1-5']
+      max: [5, 'rating must be in range of 1-5'],
+      set: (val: number): number => Math.round(val * 10) / 10
     },
     ratingsQuantity: {
       type: Number,
@@ -101,7 +103,8 @@ const toursSchema = new mongoose.Schema(
         description: String,
         day: Number
       }
-    ]
+    ],
+    guides: [{ type: SchemaTypes.ObjectId, ref: 'User' }]
   },
   {
     toJSON: { virtuals: true },
@@ -109,9 +112,21 @@ const toursSchema = new mongoose.Schema(
   }
 )
 
+// toursSchema.index({ price: 1 })
+toursSchema.index({ price: 1, ratingsAverage: -1 })
+toursSchema.index({ slug: 1 })
+toursSchema.index({ startLocation: '2dsphere' })
+
 // virtual properties
 toursSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7
+})
+
+// virtual populate:
+toursSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', // key field to current model in foreign collection
+  localField: '_id' // which field here coresponding to that foreign key above
 })
 
 // DOCUMENT pre [hook] MIDDLEWARE
@@ -132,37 +147,52 @@ toursSchema.pre('save', function(next) {
 // })
 
 // QUERY MIDDLEWARE
-toursSchema.pre('find', function(next) {
+toursSchema.pre('find', function(this: TourQuery, next) {
   // this. is current QUERY
-  ;(this as any).start = Date.now()
-  this.find({ secretTour: { $ne: true } }).select('-secretTour')
+  this.start = Date.now()
+  this.find({ secretTour: { $ne: true } })
+    // .select('-secretTour')
+    .populate({
+      path: 'guides'
+      // select: '-__v -passwordChangedAt'
+    })
   next()
 })
 
-toursSchema.pre('findOne', function(next) {
+toursSchema.pre('findOne', function(this: TourQuery, next) {
   // this. is current QUERY
-  ;(this as any).start = Date.now()
-  this.find({ secretTour: { $ne: true } }).select('-secretTour')
+  this.start = Date.now()
+  this.find({ secretTour: { $ne: true } })
+    // .select('-secretTour')
+    .populate({
+      path: 'guides'
+      // select: '-__v -passwordChangedAt'
+    })
   next()
 })
 
-toursSchema.post('find', function(docs, next) {
+toursSchema.post('find', function(this: TourQuery, docs, next) {
   // this. is current QUERY
-  logger.info(`[query time] ${Date.now() - (this as any).start}ms`)
+  logger.info(`[query time] ${Date.now() - this.start}ms`)
   next()
 })
 
-toursSchema.post('findOne', function(docs, next) {
+toursSchema.post('findOne', function(this: TourQuery, docs, next) {
   // this. is current QUERY
-  logger.info(`[query time] ${Date.now() - (this as any).start}ms`)
+  logger.info(`[query time] ${Date.now() - this.start}ms`)
   next()
 })
 
 // AGGREGATION MIDDLEWARE
-toursSchema.pre('aggregate', function(next) {
-  // this. is current AGGREGATION object
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
-  // logger.info('[aggregation pre hook]', this.pipeline())
-  next()
-})
-export default mongoose.model('Tour', toursSchema)
+// toursSchema.pre('aggregate', function(next) {
+//   // this. is current AGGREGATION object
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
+//   // logger.info('[aggregation pre hook]', this.pipeline())
+//   next()
+// })
+
+// const TourModel: TourModel = model<TourDocument>('Tour', toursSchema)
+const TourModel: TourModel = model('Tour', toursSchema)
+
+// export default model('Tour', toursSchema)
+export default TourModel
