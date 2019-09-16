@@ -25,36 +25,55 @@ const handleJWTError = (): AppError => new AppError('not authorized', 401)
 const handleJWTExpiredError = (): AppError =>
   new AppError('session expired', 401)
 
-const sendErrorDev = (err: AppError, res: Response): void => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack
-  })
-}
-
-const sendErrorProd = (err: AppError, res: Response): void => {
-  // operational, trusted error
-  if (err.isOperational) {
+const sendErrorDev = (err: AppError, url: string, res: Response): void => {
+  if (url.startsWith('/api')) {
+    // API
     res.status(err.statusCode).json({
       status: err.status,
-      message: err.message
+      error: err,
+      message: err.message,
+      stack: err.stack
     })
   } else {
-    logger.error('internal error', err)
+    // RENDERED WEBSITE
+    logger.error('[sendErrorDev] ', err)
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      msg: err.message
+    })
+  }
+}
 
-    // programming or other unknown error, don't leak error details
-    res.status(500).json({
-      status: 'error',
-      message: 'internal server error'
+const sendErrorProd = (err: AppError, url: string, res: Response): void => {
+  if (url.startsWith('/api')) {
+    // API
+    // operational, trusted error
+    if (err.isOperational) {
+      res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message
+      })
+    } else {
+      logger.error('internal error', err)
+
+      // programming or other unknown error, don't leak error details
+      res.status(500).json({
+        status: 'error',
+        message: 'please try agaiin later'
+      })
+    }
+  } else {
+    // RENDERED WEBSITE
+    res.status(err.isOperational ? err.statusCode : 500).render('error', {
+      title: 'Something went wrong',
+      msg: err.isOperational ? err.message : 'internal server error'
     })
   }
 }
 
 const errorHandlerMiddleware: ErrorRequestHandler = (
   err: AppError,
-  _req,
+  req,
   res,
   _next
 ) => {
@@ -63,9 +82,10 @@ const errorHandlerMiddleware: ErrorRequestHandler = (
 
   logger.warn('[error handling middleware]')
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res)
+    sendErrorDev(err, req.originalUrl, res)
   } else if (process.env.NODE_ENV === 'production') {
     let error: AppError = { ...err }
+    error.message = err.message
 
     switch (true) {
       case error.name === 'CastError':
@@ -92,7 +112,7 @@ const errorHandlerMiddleware: ErrorRequestHandler = (
     //   error = handleValiidationErrorDB(error)
     // if (error.name === 'JsonWebTokenError') error = handleJWTError(error)
 
-    sendErrorProd(error, res)
+    sendErrorProd(error, req.originalUrl, res)
   }
   // next()
 }

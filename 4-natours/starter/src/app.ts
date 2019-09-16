@@ -1,9 +1,11 @@
+import path = require('path')
 import express = require('express')
 import rateLimit = require('express-rate-limit')
 import helmet = require('helmet')
 import mongoSanitize = require('express-mongo-sanitize')
 import xss = require('xss-clean')
 import hpp = require('hpp')
+import cookieParser = require('cookie-parser')
 
 // import rateLimit from 'express-rate-limit'
 import logger from './logger'
@@ -12,11 +14,18 @@ import globalErrorHandler from './controllers/errorController'
 import userRouter from './routes/userRoutes'
 import tourRouter from './routes/tourRoutes'
 import reviewRouter from './routes/reviewRoutes'
+import viewRouter from './routes/viewRoutes'
 
 export const app = express()
 
+// tell express to use PUG
+app.set('view engine', 'pug')
+app.set('views', path.join(__dirname, 'views'))
+
 // *****************************************************************************
 // MIDDLEWARES
+
+app.use(express.static(path.join(__dirname, '../public')))
 
 // Set security HTTP headers
 app.use(helmet())
@@ -29,8 +38,8 @@ const limiter = new rateLimit({
 })
 app.use('/api', limiter)
 
-// body parser
-app.use(express.json({ limit: '10kb' }))
+app.use(express.json({ limit: '10kb' })) // body parser
+app.use(cookieParser()) // parse cookie data
 
 // data sanitization against NoSQL query injection
 app.use(mongoSanitize())
@@ -52,18 +61,17 @@ app.use(
   })
 )
 
-// app.use(express.static(`${__dirname}/../public`));
-
 // created middleware attached after a rounte, won't affected prior routes
 app.use((req, _res, next) => {
   logger.info(`${req.protocol} ${req.method} ${req.url}`)
   logger.info('[headers]', req.headers)
+  logger.info('[cookies]', req.cookies)
   next()
 })
 
 // *****************************************************************************
 // ROUTES
-
+app.use('/', viewRouter)
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/reviews', reviewRouter)

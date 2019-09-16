@@ -89,6 +89,11 @@ export const login = catchAsync(
   }
 )
 
+export const logout: RequestHandler = (_req, res) => {
+  res.cookie('jwt', 'expire jwt', { maxAge: 10000, httpOnly: true })
+  res.status(200).json({ status: 'success' })
+}
+
 export const protect = catchAsync(
   async (req: AppRequest, res: Response, next: NextFunction): Promise<void> => {
     // 1) get token if it's there
@@ -98,6 +103,8 @@ export const protect = catchAsync(
       req.headers.authorization.startsWith('Bearer')
     ) {
       token = req.headers.authorization.split(' ')[1]
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt
     }
 
     if (!token) return next(new AppError('not authorized', 401))
@@ -122,6 +129,39 @@ export const protect = catchAsync(
     next()
   }
 )
+
+// only for rendered pages, no errors!
+export const isLoggedIn = async (
+  req: AppRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  if (req.cookies.jwt) {
+    try {
+      // verify token
+      const decoded: any = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      )
+
+      // if token verified, check if user still exists
+      const currentUser = await User.findById(decoded.id)
+      if (!currentUser) return next()
+
+      // check if user changed password after token was issued
+      // (if someone stole login creds and actual user changes password to
+      // protect against this situtation)
+      if (currentUser.changedPasswordAfter(decoded.iat)) return next()
+
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser
+      return next()
+    } catch (err) {
+      return next()
+    }
+  }
+  next()
+}
 
 export const restrictTo = (...roles: string[]): RequestHandler => (
   req: AppRequest,
