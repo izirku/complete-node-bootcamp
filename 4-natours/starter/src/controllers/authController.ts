@@ -90,8 +90,9 @@ export const login = catchAsync(
 )
 
 export const logout: RequestHandler = (_req, res) => {
-  res.cookie('jwt', 'expire jwt', { maxAge: 10000, httpOnly: true })
+  res.cookie('jwt', 'loggedout', { maxAge: 10000, httpOnly: true })
   res.status(200).json({ status: 'success' })
+  // res.redirect('/')
 }
 
 export const protect = catchAsync(
@@ -103,7 +104,7 @@ export const protect = catchAsync(
       req.headers.authorization.startsWith('Bearer')
     ) {
       token = req.headers.authorization.split(' ')[1]
-    } else if (req.cookies.jwt) {
+    } else if (req.cookies.jwt && req.cookies.jwt !== 'loggedout') {
       token = req.cookies.jwt
     }
 
@@ -126,6 +127,7 @@ export const protect = catchAsync(
       return next(new AppError('not authorized', 401))
 
     req.user = currentUser
+    res.locals.user = currentUser
     next()
   }
 )

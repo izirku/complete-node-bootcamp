@@ -39,6 +39,7 @@ const limiter = new rateLimit({
 app.use('/api', limiter)
 
 app.use(express.json({ limit: '10kb' })) // body parser
+app.use(express.urlencoded({ extended: true, limit: '10kb' })) // get data from HTML FORMS
 app.use(cookieParser()) // parse cookie data
 
 // data sanitization against NoSQL query injection
@@ -64,8 +65,8 @@ app.use(
 // created middleware attached after a rounte, won't affected prior routes
 app.use((req, _res, next) => {
   logger.info(`${req.protocol} ${req.method} ${req.url}`)
-  logger.info('[headers]', req.headers)
-  logger.info('[cookies]', req.cookies)
+  // logger.info('[headers]', req.headers)
+  // logger.info('[cookies]', req.cookies)
   next()
 })
 

@@ -1263,6 +1263,10 @@ body {
   color: #bbb;
 }
 
+.form__group--hidden {
+  display: none;
+}
+
 .form__group:not(:last-child) {
   margin-bottom: 2.5rem;
 }

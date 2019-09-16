@@ -1,7 +1,9 @@
 import { RequestHandler } from 'express'
 import Tour from '../models/tourModel'
+import User from '../models/userModel'
 import catchAsync from '../utils/catchAsync'
 import appError from '../utils/appError'
+import { AppRequest } from '../interfaces'
 
 export const getOverview: RequestHandler = catchAsync(
   async (req, res, _next) => {
@@ -38,3 +40,26 @@ export const getTour: RequestHandler = catchAsync(async (req, res, next) => {
 export const getLoginForm: RequestHandler = (_req, res) => {
   res.status(200).render('login', { title: 'Log into your account' })
 }
+
+// export const getAccount: RequestHandler = catchAsync(
+export const getAccount: RequestHandler = (_req, res) => {
+  // res.locals.user = req.user // was placed in 'protect' middleware....
+  res.status(200).render('account', { title: 'Your account' })
+}
+
+// requires express.urlencoded middleware
+// export const updateUserData: RequestHandler = catchAsync(
+//   async (req: AppRequest, res, next) => {
+//     const updatedUser = await User.findByIdAndUpdate(
+//       req.user.id,
+//       {
+//         name: req.body.name,
+//         email: req.body.email
+//       },
+//       { new: true, runValidators: true }
+//     )
+
+//     res.status(200).json({ status: 'success' })
+//     // .render('account', { title: 'Your account', user: updatedUser })
+//   }
+// )

@@ -1,4 +1,5 @@
 import express = require('express')
+import multer = require('multer')
 import {
   getAllUsers,
   createUser,

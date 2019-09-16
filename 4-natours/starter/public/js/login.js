@@ -28,7 +28,8 @@ export const logout = async () => {
       method: 'GET',
       url: 'http://localhost:3000/api/v1/users/logout'
     })
-    if (res.data.status === 'success') window.location.reload(true) // true means, get from server, not cache
+    // if (res.data.status === 'success') window.location.reload(true) // true means, get from server, not cache
+    if (res.data.status === 'success') location.assign('/') // TODO: make sure works nicely with browser cache
   } catch (err) {
     showAlert('error', 'an error occured while logging out')
   }
