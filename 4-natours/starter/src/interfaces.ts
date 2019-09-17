@@ -79,6 +79,7 @@ export interface TourQuery extends Query<TourDocument> {
 
 export interface AppRequest extends Request {
   user?: UserDocument
+  // file?: any // is provided by Multer
 }
 
 export interface AppMailOptions {

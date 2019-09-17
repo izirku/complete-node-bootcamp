@@ -9,7 +9,9 @@ import {
   updateTour,
   deleteTour,
   getToursWithin,
-  getDistances
+  getDistances,
+  uploadTourImages,
+  resizeTourImages
 } from '../controllers/tourController'
 import { protect, restrictTo } from '../controllers/authController'
 import reviewRouter from '../routes/reviewRoutes'
@@ -51,7 +53,13 @@ router
 router
   .route('/:id')
   .get(getTour)
-  .patch(protect, restrictTo('admin', 'lead-guide'), updateTour)
+  .patch(
+    protect,
+    restrictTo('admin', 'lead-guide'),
+    uploadTourImages,
+    resizeTourImages,
+    updateTour
+  )
   .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour)
 
 export default router

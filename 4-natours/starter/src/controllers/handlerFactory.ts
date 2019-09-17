@@ -64,7 +64,10 @@ export const retrieveAll = (Model: Model<AppDocuments>): RequestHandler =>
 
 export const updateOne = (Model: Model<AppDocuments>): RequestHandler =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndUpdate(req.params.id, req.body)
+    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    })
 
     if (!doc) {
       return next(new AppError('document not found', 404))

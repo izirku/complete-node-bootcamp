@@ -1,5 +1,4 @@
 import express = require('express')
-import multer = require('multer')
 import {
   getAllUsers,
   createUser,
@@ -8,7 +7,9 @@ import {
   deleteUser,
   updateMe,
   deleteMe,
-  getMe
+  getMe,
+  uploadUserPhoto,
+  resizeUserPhoto
 } from '../controllers/userController'
 import {
   protect,
@@ -36,7 +37,7 @@ router.use(protect)
 router.patch('/updateMyPassword', updatePassword)
 
 router.get('/me', getMe, getUser)
-router.patch('/updateMe', updateMe)
+router.patch('/updateMe', uploadUserPhoto, resizeUserPhoto, updateMe)
 router.delete('/deleteMe', deleteMe)
 
 // *****************************************************************************

@@ -1,4 +1,6 @@
 import { RequestHandler } from 'express'
+import multer = require('multer')
+import sharp = require('sharp')
 import {
   deleteOne,
   updateOne,
@@ -18,6 +20,54 @@ const filterObj = (obj: any, ...rest): any => {
   return newObj
 }
 
+// *****************************************************************************
+// UPLOAD A PHOTO MIDDLEWARE
+
+// simple:
+// const upload = multer({ dest: 'public/img/users' })
+// disk storage... we not using it as we need to process image in mem first
+// const multerStorage = multer.diskStorage({
+//   destination: (_req, _file, cb) => {
+//     cb(null, 'public/img/users')
+//   },
+//   filename: (req: AppRequest, file, cb) => {
+//     // user-user_id-timestamp.ext
+//     const ext = file.mimetype.split('/')[1]
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`)
+//   }
+// })
+const multerStorage = multer.memoryStorage()
+
+const multerFilter = (_req, file, cb): void => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true)
+  } else {
+    cb(new appError('Not an image. please upload only images', 400), false)
+  }
+}
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+})
+
+export const uploadUserPhoto = upload.single('photo')
+
+export const resizeUserPhoto: RequestHandler = catchAsync(
+  async (req: AppRequest, _res, next) => {
+    if (!req.file) return next()
+
+    req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
+
+    await sharp(req.file.buffer)
+      .resize(500, 500)
+      .toFormat('jpeg')
+      .jpeg({ quality: 75 })
+      .toFile(`public/img/users/${req.file.filename}`)
+    next()
+  }
+)
+
 export const getMe: RequestHandler = (req: AppRequest, _res, next) => {
   req.params.id = req.user.id
   next()
@@ -31,6 +81,9 @@ export const updateMe: RequestHandler = catchAsync(
 
     // 2) filter out all but allowed fields
     const filteredBody = filterObj(req.body, 'name', 'email')
+
+    // if there was a photo uploaded, update user's photo property in DB:
+    if (req.file) filteredBody.photo = req.file.filename
 
     // 3) update user document
     const updatedUser = await User.findByIdAndUpdate(

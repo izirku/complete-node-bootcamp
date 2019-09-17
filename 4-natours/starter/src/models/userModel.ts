@@ -21,7 +21,7 @@ const userSchema = new Schema({
     minlength: [2, 'user name must be between 2-30 characters long'],
     maxlength: [30, 'user name must be between 2-30 characters long']
   },
-  photo: String,
+  photo: { type: String, default: 'default.jpg' },
   email: {
     type: String,
     required: [true, 'user must provide an email'],
