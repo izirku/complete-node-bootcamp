@@ -12,7 +12,7 @@ import User from '../models/userModel'
 import catchAsync from '../utils/catchAsync'
 import AppError from '../utils/appError'
 import { AppRequest, UserDocument } from '../interfaces'
-import sendEmail from '../utils/email'
+import { Email } from '../utils/email'
 // import logger from '../logger'
 
 const signToken = (id: string): string =>
@@ -63,6 +63,9 @@ export const signup = catchAsync(
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: Date.now() - 5000
     })
+
+    const url = `${req.protocol}://${req.get('host')}/me`
+    await new Email(newUser, url).sendWelcome()
 
     createSendToken(newUser, 201, res)
   }
@@ -216,19 +219,8 @@ export const forgotPassword: RequestHandler = catchAsync(
       'host'
     )}/api/v1/users/resetPassword/${resetToken}`
 
-    const message = `
-Forgot your password? Submit a PATCH request with your new password and passwordConfirm to:
-
-  ${resetURL}
-
-If you didn't forget your password, please ignore this email!`
-
     try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Your password reset token (valid for 10 minutes)',
-        message
-      })
+      await new Email(user, resetURL).sendPasswordReset()
     } catch (err) {
       user.passwordResetToken = undefined
       user.passwordResetExpires = undefined
