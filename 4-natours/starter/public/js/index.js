@@ -3,6 +3,7 @@
 import { login, logout } from './login'
 import { displayMap } from './mapbox'
 import { updateSettings } from './updateSettings'
+import { bookTour } from './stripe'
 
 // DOM Elements
 const mapBox = document.getElementById('map')
@@ -10,6 +11,7 @@ const loginForm = document.querySelector('.form--login')
 const userDataForm = document.querySelector('.form-user-data')
 const userPasswordForm = document.querySelector('.form-user-password')
 const logoutBtn = document.querySelector('.nav__el--logout')
+const bookBtn = document.getElementById('book-tour')
 
 // DELEGATION
 if (mapBox) {
@@ -62,5 +64,13 @@ if (userPasswordForm) {
     document.getElementById('password-confirm').value = ''
     document.getElementById('password-current').value = ''
     savePasswordBtn.textContent = 'Save Password'
+  })
+}
+
+if (bookBtn) {
+  bookBtn.addEventListener('click', async e => {
+    // const { tourId } = e.target.dataset
+    e.target.textContent = 'Processing...'
+    await bookTour(e.target.dataset.tourId)
   })
 }

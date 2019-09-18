@@ -58,6 +58,13 @@ export class Email {
     // if (!this.transport) {
     if (process.env.NODE_ENV === 'production') {
       // send grid transporter
+      return createTransport({
+        service: 'SendGrid',
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASSWORD
+        }
+      })
     } else {
       // GMail:
       // const transporter = nodemailer.createTransport({

@@ -3,6 +3,7 @@ import { Document, Model, Types, Query } from 'mongoose'
 
 export type AppDocuments = UserDocument | ReviewDocument | TourDocument
 
+export interface BookingDocument extends Document {}
 export interface UserDocument extends Document {
   name: string
   photo: string
@@ -68,6 +69,7 @@ export interface TourDocument extends Document {
 export type UserModel = Model<UserDocument>
 export type ReviewModel = Model<ReviewDocument>
 export type TourModel = Model<TourDocument>
+export type BookingModel = Model<BookingDocument>
 
 export interface ReviewQuery extends Query<ReviewDocument> {
   r?: ReviewDocument

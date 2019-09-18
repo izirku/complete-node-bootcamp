@@ -1,20 +1,19 @@
 import { Router } from 'express'
+import { protect, isLoggedIn } from '../controllers/authController'
 import {
   getOverview,
   getTour,
   getLoginForm,
   getAccount
 } from '../controllers/viewsController'
-import { protect, isLoggedIn } from '../controllers/authController'
+import { createBookingCheckout } from '../controllers/bookingController'
 
 const router = Router()
 
+// TODO: temporary:
+router.get('/', createBookingCheckout, isLoggedIn, getOverview)
+router.get('/tour/:slug', isLoggedIn, getTour)
+router.get('/login', isLoggedIn, getLoginForm)
 router.get('/me', protect, getAccount)
-
-router.use(isLoggedIn)
-
-router.get('/', getOverview)
-router.get('/tour/:slug', getTour)
-router.get('/login', getLoginForm)
 
 export default router
