@@ -14,7 +14,7 @@ process.on('uncaughtException', (err: Error) => {
 const DB = process.env.MONGO_DB.replace('<PASSWORD>', process.env.MONGO_PASSWD)
 const port = process.env.NATOURS_PORT || 3000
 
-logger.info(`[starting] mode: ${process.env.NODE_ENV}`)
+logger.info(`[server] mode: ${process.env.NODE_ENV}`)
 mongoose
   .connect(DB, {
     useNewUrlParser: true,
@@ -23,7 +23,7 @@ mongoose
     useUnifiedTopology: true
   })
   .then(() => {
-    logger.info('[db] connection succesful')
+    logger.info('[server] connection succesful')
   })
 
 const server = app.listen(port, () => {

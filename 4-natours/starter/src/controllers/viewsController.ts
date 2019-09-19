@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express'
 import Tour from '../models/tourModel'
 import User from '../models/userModel'
+import Booking from '../models/bookingModel'
 import catchAsync from '../utils/catchAsync'
 import appError from '../utils/appError'
 import { AppRequest } from '../interfaces'
@@ -47,7 +48,25 @@ export const getAccount: RequestHandler = (_req, res) => {
   res.status(200).render('account', { title: 'Your account' })
 }
 
+export const getMyTours: RequestHandler = catchAsync(
+  async (req: AppRequest, res, next) => {
+    // could also be done with virtual populate...
+
+    // 1) find all bookings
+    const bookings = await Booking.find({ user: req.user.id })
+
+    // 2) find tours with the required IDs
+    const tourIds = bookings.map(el => el.tour)
+    const tours = await Tour.find({ _id: { $in: tourIds } })
+
+    // 3) render
+    res.status(200).render('overview', { title: 'My Tours', tours })
+  }
+)
+
 // requires express.urlencoded middleware
+// + forces a page reload
+
 // export const updateUserData: RequestHandler = catchAsync(
 //   async (req: AppRequest, res, next) => {
 //     const updatedUser = await User.findByIdAndUpdate(

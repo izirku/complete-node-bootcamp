@@ -3,3 +3,5 @@ node_modules/
 .vscode/
 public/js/bundle*
 public/js/tokens.js
+*.env
+logs/*.log

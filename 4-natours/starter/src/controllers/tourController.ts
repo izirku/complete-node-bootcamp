@@ -208,7 +208,7 @@ export const getToursWithin: RequestHandler = catchAsync(
         )
       )
 
-    console.log(distance, lat, lng, unit)
+    // console.log(distance, lat, lng, unit)
 
     const tours = await Tour.find({
       startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radRadius] } }
@@ -239,7 +239,7 @@ export const getDistances: RequestHandler = catchAsync(
         )
       )
 
-    console.log(lat, lng, unit)
+    // console.log(lat, lng, unit)
 
     const distances = await Tour.aggregate([
       {

@@ -31,6 +31,9 @@ const bookingSchema = new Schema({
   }
 })
 
+// FIXME: populate path `tour` selects more than just the name
+// modifynig mongoose midleware on Tour schema should fix it by
+// not automatically populating the guides maybe?
 bookingSchema.pre('find', function(next) {
   // .this is query
   // this.populate({

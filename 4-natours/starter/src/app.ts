@@ -6,6 +6,8 @@ import mongoSanitize = require('express-mongo-sanitize')
 import xss = require('xss-clean')
 import hpp = require('hpp')
 import cookieParser = require('cookie-parser')
+import compression = require('compression')
+// import morgan = require('morgan')
 
 // import rateLimit from 'express-rate-limit'
 import logger from './logger'
@@ -63,13 +65,19 @@ app.use(
   })
 )
 
-// created middleware attached after a rounte, won't affected prior routes
+// compression
+app.use(compression())
+
+// note: created middleware attached after a rounte, won't affected prior routes
+
+// using Winstan directly
 app.use((req, _res, next) => {
-  logger.info(`${req.protocol} ${req.method} ${req.url}`)
-  // logger.info('[headers]', req.headers)
-  // logger.info('[cookies]', req.cookies)
+  logger.info('req', { method: req.method, url: req.url, ip: req.ip })
   next()
 })
+
+// using morgan/winston
+// app.use(morgan())
 
 // *****************************************************************************
 // ROUTES

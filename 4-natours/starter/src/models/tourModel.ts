@@ -2,7 +2,7 @@ import { Schema, model, SchemaTypes } from 'mongoose'
 import slugify from 'slugify'
 // import validator from 'validator'
 import logger from '../logger'
-import { TourDocument, TourModel, TourQuery } from '../interfaces'
+import { TourModel, TourQuery } from '../interfaces'
 
 const toursSchema = new Schema(
   {
@@ -171,17 +171,19 @@ toursSchema.pre('findOne', function(this: TourQuery, next) {
   next()
 })
 
-toursSchema.post('find', function(this: TourQuery, docs, next) {
-  // this. is current QUERY
-  logger.info(`[query time] ${Date.now() - this.start}ms`)
-  next()
-})
+// see how long tour queries take whiile in development
 
-toursSchema.post('findOne', function(this: TourQuery, docs, next) {
-  // this. is current QUERY
-  logger.info(`[query time] ${Date.now() - this.start}ms`)
-  next()
-})
+// toursSchema.post('find', function(this: TourQuery, docs, next) {
+//   // this. is current QUERY
+//   logger.info(`[query time] ${Date.now() - this.start}ms`)
+//   next()
+// })
+
+// toursSchema.post('findOne', function(this: TourQuery, docs, next) {
+//   // this. is current QUERY
+//   logger.info(`[query time] ${Date.now() - this.start}ms`)
+//   next()
+// })
 
 // AGGREGATION MIDDLEWARE
 // toursSchema.pre('aggregate', function(next) {

@@ -80,7 +80,7 @@ const errorHandlerMiddleware: ErrorRequestHandler = (
   err.statusCode = err.statusCode ? err.statusCode : 500
   err.status = err.status ? err.status : 'error'
 
-  logger.warn('[error handling middleware]')
+  // logger.warn('[error handling middleware]')
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, req.originalUrl, res)
   } else if (process.env.NODE_ENV === 'production') {

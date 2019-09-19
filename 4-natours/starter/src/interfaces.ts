@@ -1,9 +1,20 @@
 import { Request } from 'express'
 import { Document, Model, Types, Query } from 'mongoose'
 
-export type AppDocuments = UserDocument | ReviewDocument | TourDocument
+export type AppDocuments =
+  | UserDocument
+  | ReviewDocument
+  | TourDocument
+  | BookingDocument
 
-export interface BookingDocument extends Document {}
+export interface BookingDocument extends Document {
+  price: number
+  createdAt: number
+  paid: boolean
+  user: { type: Types.ObjectId; ref: string }
+  tour: { type: Types.ObjectId; ref: string }
+}
+
 export interface UserDocument extends Document {
   name: string
   photo: string

@@ -62,3 +62,16 @@ export const createBookingCheckout: RequestHandler = catchAsync(
     res.redirect(req.originalUrl.split('?')[0])
   }
 )
+
+// *****************************************************************************
+// C.R.U.D.
+export const createBooking = createOne(Booking)
+export const getBooking = retrieveOne(Booking)
+export const getAllBookings = retrieveAll(Booking)
+export const updateBooking = updateOne(Booking)
+export const deleteBooking = deleteOne(Booking)
+
+// export const createBooking: RequestHandler = catchAsync(async (req, res, next) => {
+//   const booking = await createOne(Booking)
+//   res.status(200)
+// })
